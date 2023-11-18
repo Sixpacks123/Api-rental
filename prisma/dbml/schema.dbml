@@ -1,0 +1,85 @@
+//// ------------------------------------------------------
+//// THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+//// ------------------------------------------------------
+
+Table Person {
+  id Int [pk, increment]
+  firstName String [not null]
+  lastName String [not null]
+  email String [unique, not null]
+  owner Owner [not null]
+  tenant Tenant [not null]
+}
+
+Table Owner {
+  id Int [pk, increment]
+  personId Int [unique, not null]
+  person Person [not null]
+  accountId String [unique, not null]
+  isVATRegistered Boolean [not null]
+  apartments Apartment [not null]
+}
+
+Table Tenant {
+  id Int [pk, increment]
+  personId Int [unique, not null]
+  person Person [not null]
+  isMainTenant Boolean [not null]
+  apartments Apartment [not null]
+}
+
+Table Syndic {
+  id Int [pk, increment]
+  name String [not null]
+  buildings Building [not null]
+}
+
+Table CommonFacility {
+  id Int [pk, increment]
+  name String [not null]
+  description String
+  buildings Building [not null]
+  apartments Apartment [not null]
+}
+
+Table Building {
+  id Int [pk, increment]
+  name String [not null]
+  syndicId Int [not null]
+  syndic Syndic [not null]
+  commonFacilities CommonFacility [not null]
+  apartments Apartment [not null]
+}
+
+Table Apartment {
+  id Int [pk, increment]
+  buildingId Int [not null]
+  building Building [not null]
+  type String [not null]
+  ownerId Int [not null]
+  owner Owner [not null]
+  tenants Tenant [not null]
+  commonFacilities CommonFacility [not null]
+  rentReceipts RentReceipt [not null]
+}
+
+Table RentReceipt {
+  id Int [pk, increment]
+  apartmentId Int [not null]
+  apartment Apartment [not null]
+  issueDate DateTime [not null]
+  paymentDate DateTime
+  reminderDates DateTime[] [not null]
+}
+
+Ref: Owner.personId > Person.id
+
+Ref: Tenant.personId > Person.id
+
+Ref: Building.syndicId > Syndic.id
+
+Ref: Apartment.buildingId > Building.id
+
+Ref: Apartment.ownerId > Owner.personId
+
+Ref: RentReceipt.apartmentId > Apartment.id
