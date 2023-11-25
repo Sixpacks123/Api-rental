@@ -9,90 +9,76 @@ datasource db {
   provider = "postgresql"
   url      = "postgresql://postgres:postgres@localhost:5432/graphql_example?connect_timeout=300"
 }
-// building.model.ts
 model Building {
-  id         Int         @id @default(autoincrement())
-  name       String
-  syndic     Syndic      @relation(fields: [syndicId], references: [id])
-  syndicId   Int
-  apartments Apartment[]
-  commonAreas CommonArea[]
+  id               Int               @id @default(autoincrement())
+  name             String
+  address          String
+  syndicId         Int
+  syndic           Syndic            @relation(fields: [syndicId], references: [id])
+  apartments       Apartment[]
+  commonFacilities CommonFacility[]
 }
 
-// apartment.model.ts
+model Syndic {
+  id               Int               @id @default(autoincrement())
+  name             String
+  contactInfo      String
+  buildings        Building[]
+}
+
+model CommonFacility {
+  id               Int               @id @default(autoincrement())
+  name             String
+  type             String
+  buildingId       Int
+  building         Building          @relation(fields: [buildingId], references: [id])
+}
+
 model Apartment {
-  id              Int            @id @default(autoincrement())
-  type            String
-  owner           Owner          @relation(fields: [ownerId], references: [id])
-  ownerId         Int
-  options         Option[]
-  tenants         Tenant[]       @relation("ApartmentTenant")
-  mainTenantId    Int?
-  building        Building       @relation(fields: [buildingId], references: [id])
-  buildingId      Int
-  commonAreas     CommonArea[]   @relation("ApartmentCommonAreas", references: [id])
-  rentReceipts    RentReceipt[]
+  id               Int               @id @default(autoincrement())
+  type             String
+  ownerId          Int
+  owner            Owner             @relation(fields: [ownerId], references: [id])
+  tenants          Tenant[]
+  options          Option[]
+  buildingId       Int
+  capacity         Int
+  building         Building          @relation(fields: [buildingId], references: [id])
 }
 
-// option.model.ts
-model Option {
-  id           Int      @id @default(autoincrement())
-  name         String
-  apartments   Apartment[] @relation("ApartmentOptions")
-}
-
-// person.model.ts
-model Person {
-  id              Int      @id @default(autoincrement())
-  accountNumber   String
-  isVatSubject    Boolean
-  tenants         Tenant[]
-  owners          Owner[]
-}
-
-// tenant.model.ts
-model Tenant {
-  id               Int      @id @default(autoincrement())
-  person           Person   @relation(fields: [personId], references: [id])
-  personId         Int
-  apartment        Apartment @relation(fields: [apartmentId], references: [id])
-  apartmentId      Int
-  isMainTenant     Boolean
+model Owner {
+  id               Int            @id @default(autoincrement())
+  name             String
+  accountNumber    String
+  vatSubject       Boolean
+  apartments       Apartment[]
   rentReceipts     RentReceipt[]
 }
 
-// syndic.model.ts
-model Syndic {
-  id         Int      @id @default(autoincrement())
-  name       String
-  buildings  Building[]
+model Tenant {
+  id               Int            @id @default(autoincrement())
+  name             String
+  apartmentId      Int
+  apartment        Apartment      @relation(fields: [apartmentId], references: [id])
+  isMainTenant     Boolean        @default(false)
+  rentReceipts     RentReceipt[]
 }
 
-// owner.model.ts
-model Owner {
-  id           Int     @id @default(autoincrement())
-  person       Person  @relation(fields: [personId], references: [id])
-  personId     Int
-  accountNumber String
-  isVatSubject Boolean
-  rentReceipts RentReceipt[]
+model Option {
+  id               Int               @id @default(autoincrement())
+  description      String
+  apartmentId      Int
+  apartment        Apartment         @relation(fields: [apartmentId], references: [id])
 }
 
-// common-area.model.ts
-model CommonArea {
-  id         Int      @id @default(autoincrement())
-  name       String
-  buildings  Building[] @relation(fields: [buildingId], references: [id])
-  buildingId Int
-  apartments Apartment[] @relation("ApartmentCommonAreas", references: [id])
-}
-
-// rent-receipt.model.ts
 model RentReceipt {
-  id               Int      @id @default(autoincrement())
+  id               Int            @id @default(autoincrement())
   issueDate        DateTime
   paymentDate      DateTime?
   reminderDates    DateTime[]
-  apartment        Apartment @relation(fields: [apartmentId], references: [id])
-  apartmentId      Int
+  paymentStatus    String
+  tenantId         Int
+  tenant           Tenant         @relation(fields: [tenantId], references: [id])
+  ownerId          Int
+  owner            Owner          @relation(fields: [ownerId], references: [id])
 }
